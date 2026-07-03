@@ -8,7 +8,7 @@
     <!-- 引入 Tailwind CSS (CDN版) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 自訂 Tailwind 設定以支援特殊顏色與字體 -->
+    <!-- 自訂 Tailwind 設定 -->
     <script>
         tailwind.config = {
             theme: {
@@ -29,31 +29,11 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
         }
-        
-        .bounce-slight {
-            animation: bounce-slight 2s infinite ease-in-out;
-        }
-        
-        @keyframes bounce-slight {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        /* 隱藏捲動軸但保持可捲動 */
-        .hide-scrollbar::-webkit-scrollbar { 
-            display: none; 
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        
-        /* 玻璃透視效果 */
-        .glass-header {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
+        .bounce-slight { animation: bounce-slight 2s infinite ease-in-out; }
+        @keyframes bounce-slight { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="bg-rose-50 text-slate-800 pb-20 overflow-x-hidden min-h-screen">
@@ -69,258 +49,131 @@
                 <span class="break-words text-center">大胖小胖韓國吃貨之旅</span>
                 <span class="bounce-slight text-2xl sm:text-3xl" style="animation-delay: 0.5s;">✈️</span>
             </h1>
-            <p class="text-xs sm:text-sm font-bold text-slate-500 mt-2 bg-white inline-block px-3 py-1 rounded-lg shadow-inner">
-                📅 2026/07/08 - 07/12 (大田 ✕ 首爾)
-            </p>
-            <div class="mt-3 flex flex-wrap justify-center items-center gap-2 px-2">
-                <span class="bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs px-2 py-1 rounded border border-emerald-200 font-bold whitespace-nowrap">👟 每日目標：2萬步內</span>
-                <span class="bg-orange-100 text-orange-800 text-[10px] sm:text-xs px-2 py-1 rounded border border-orange-200 font-bold whitespace-nowrap">🚇 善用公車/地鐵</span>
-            </div>
         </div>
     </header>
 
     <main class="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 w-full">
         
         <!-- 天數切換 Tabs -->
-        <div id="tabs-container" class="flex overflow-x-auto hide-scrollbar gap-2 sm:gap-3 mb-6 sm:mb-8 pb-4 pt-2 px-1 snap-x">
-            <!-- Tabs 將由 JS 動態生成 -->
-        </div>
+        <div id="tabs-container" class="flex overflow-x-auto hide-scrollbar gap-2 sm:gap-3 mb-6 sm:mb-8 pb-4 pt-2 px-1 snap-x"></div>
 
         <!-- 行程內容區塊 -->
         <div class="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl shadow-rose-100/50 border border-white w-full">
             <div class="mb-6 sm:mb-8 text-center">
-                <h2 id="highlight-text" class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl text-sm sm:text-md font-bold shadow-sm border border-yellow-200 max-w-full break-words">
-                    <!-- 亮點將由 JS 動態生成 -->
-                </h2>
+                <h2 id="highlight-text" class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1.5 sm:px-5 sm:py-2 rounded-xl text-sm sm:text-md font-bold shadow-sm border border-yellow-200 max-w-full break-words"></h2>
             </div>
 
-            <div id="events-container" class="relative border-l-[3px] sm:border-l-4 border-rose-200 ml-3 sm:ml-6 space-y-6 sm:space-y-10 pb-4">
-                <!-- 行程卡片將由 JS 動態生成 -->
-            </div>
+            <div id="events-container" class="relative border-l-[3px] sm:border-l-4 border-rose-200 ml-3 sm:ml-6 space-y-6 sm:space-y-10 pb-4"></div>
+            
+            <!-- 導航按鈕區 (新功能) -->
+            <div id="nav-container" class="mt-8 pt-4 border-t border-rose-100 flex gap-4"></div>
         </div>
 
     </main>
 
-    <!-- 結語區 -->
-    <footer class="max-w-3xl mx-auto px-3 sm:px-4 mt-8 sm:mt-10 mb-8 text-center w-full">
-        <div class="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-lg border border-rose-100 w-full">
-            <div class="flex flex-wrap justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-sm font-bold text-slate-600">
-                <span class="bg-rose-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg whitespace-nowrap text-rose-700">
-                    小胖攝影．大胖編輯．餐點口味因人而異．以上為大胖小胖實際用餐心得！
-                </span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- 行程資料與邏輯 -->
     <script>
-        // 狀態變數
         let activeDay = 0;
-
-        // 共用風格 Prompt 前綴 (確保一致的高畫質 Q版卡通風格)
-        const baseStyle = "2026 modern ultra high definition cute chibi cartoon style, clear crisp lines, vibrant bright colors, adorable design, masterpiece, highly detailed, ";
-
-        // 完整行程資料庫
+        const baseStyle = "2026 modern ultra high definition cute chibi cartoon style, clear crisp lines, vibrant bright colors, highly detailed, ";
         const days = [
-            {
-                id: "day1", title: "Day 1", date: "07/08 (三)", highlight: "啟程大田 ⚾ 爆汁烤五花",
-                events: [
-                    { time: "02:40 - 06:05", title: "✈️ 飛往韓國囉！", desc: "台北(TPE) ➡️ 清州(CJJ) [桃園機場出發，紅眼班機辛苦啦！]", platform: "Trip.com", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "cute airplane flying in sunny sky" },
-                    { time: "06:30 - 08:15", title: "☕ 機場甦醒：輕早餐與整備", desc: "【黃金兩小時】出關後先去機場的 CU 超商買 T-money 卡並儲值。接著在 Paris Baguette 買杯熱拿鐵跟小麵包墊胃，去洗手間盥洗換裝，優雅地迎接旅程！", platform: "行前準備", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "character drinking hot coffee in airport convenience store" },
-                    { time: "08:30 - 09:26", title: "🚂 搭乘極窮花號", desc: "清州機場車站 ➡️ 大田車站。欣賞沿途韓國鄉間風景補個眠。", platform: "Trip.com", color: "bg-indigo-100 text-indigo-800", prompt: baseStyle + "korean passenger train traveling through green countryside" },
-                    { time: "09:40 - 11:15", title: "🚶‍♂️ 行李寄放 & 中央市場探路", desc: "抵達大田車站後，先在車站內的置物櫃【寄放行李】。接著走到旁邊的大田中央市場逛逛，感受傳統市場的活力，為等下的烤肉大餐開胃！", platform: "自由安排", color: "bg-emerald-100 text-emerald-800", prompt: baseStyle + "bustling traditional korean market with food stalls" },
-                    { time: "11:30 - 13:30", title: "🥩 大胖小胖許願：味讚王鹽烤肉", desc: "【推薦店鋪】味讚王鹽烤肉(맛찬들왕소금구이)。3.5公分超厚熟成豬五花！店員會幫忙代烤到金黃酥脆，搭配特製蝦醬超級銷魂～", platform: "吃貨必備", color: "bg-red-100 text-red-800", prompt: baseStyle + "delicious thick korean bbq pork belly sizzling on grill pan" },
-                    { time: "15:00", title: "🏠 民宿 Check-in", desc: "Bake Stay (大田銀行洞)。取回行李，到民宿放下行囊，洗個臉休息一下！", platform: "Creatrip", color: "bg-amber-100 text-amber-800", prompt: baseStyle + "cozy and cute modern guesthouse room" },
-                    { time: "15:30 - 17:30", title: "☕ 景點：大田蘇堤洞 (소제동) 咖啡街", desc: "離民宿不遠的老屋改建文青聚落！坐下來喝杯拿鐵拍美照，【嚴格控管步數，為晚上保留體力】！", platform: "省腳力行程", color: "bg-emerald-100 text-emerald-800", prompt: baseStyle + "beautiful aesthetic cafe building with latte art coffee on table" },
-                    { time: "18:30 - 21:30", title: "⚾ 熱血棒球夜！(附雨備)", desc: "KBO NC恐龍 vs 韓華鷹 (大田韓華生命球場)。記得買球場裡的炸雞配啤酒，跟著韓國球迷一起跳應援舞！", backup: "☔ 【雨備方案】：若賽事因雨取消，改往民宿下方的「中央路地下街」大血拼，不怕淋雨還能順便吃室內小吃；或是找間「汗蒸幕」搓澡、喝甜米釀，讓疲勞徹底釋放！", platform: "代購/雨備", color: "bg-green-100 text-green-800", prompt: baseStyle + "cute baseball player hitting ball in crowded stadium" },
-                    { time: "22:00 - 23:00", title: "🍢 宵夜：銀杏洞 Skyroad 糖葫蘆", desc: "看完球賽搭公車回銀杏洞，在熱鬧的商圈買串現做「糖葫蘆」或是路邊攤辣炒年糕，帶回民宿當宵夜！", platform: "罪惡宵夜", color: "bg-purple-100 text-purple-800", prompt: baseStyle + "delicious shiny candied fruit tanghulu stick korean street food" }
-                ]
-            },
-            {
-                id: "day2", title: "Day 2", date: "07/09 (四)", highlight: "大田漫遊 ♨️ 汗蒸幕與馬車",
-                events: [
-                    { time: "09:30 - 10:30", title: "🥪 早餐：Isaac Toast", desc: "韓國國民早餐！鐵板奶油現烤吐司夾著特製醬料與煎蛋，快速解決又美味。", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "tasty korean toast sandwich with melted cheese and egg" },
-                    { time: "10:30 - 12:00", title: "🥐 聖心堂朝聖", desc: "【大田名產】就在銀杏洞！絕對不能錯過韓國最知名麵包店「聖心堂」買炸韭菜麵包、明太子法國麵包！", platform: "在地推薦", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "cute bakery display full of delicious fresh bread and croissants" },
-                    { time: "12:30 - 14:00", title: "🛍️ 景點：大田新世界百貨", desc: "吃完早餐先去超美的「大田新世界百貨」逛街喝咖啡吹冷氣，順便消化一下！", platform: "自由安排", color: "bg-purple-100 text-purple-800", prompt: baseStyle + "modern beautiful department store shopping mall architecture" },
-                    { time: "14:30 - 18:00", title: "♨️ 下午茶與放鬆：東方朔汗蒸幕", desc: "【鐵腿救星】大田最有名的汗蒸幕！換上專屬服裝、折個羊角頭，買杯冰涼的「甜米釀(식혜)」和烤雞蛋。在溫暖的地熱墊上睡個午覺，把旅行的疲勞全部排光光！", platform: "許願行程", color: "bg-cyan-100 text-cyan-800", prompt: baseStyle + "cute couple wearing sheep head towel in korean jjimjilbang sauna eating eggs" },
-                    { time: "19:30 - 22:00", title: "🎪 大胖小胖許願：木尺橋布帳馬車", desc: "【推薦地點】木尺橋布帳馬車街(목척교)。離民宿不遠的川邊，體驗韓劇主角的浪漫！必點辣炒豬肉、雞蛋捲配燒酒，感受在地微醺夜。", platform: "許願行程", color: "bg-rose-100 text-rose-800", prompt: baseStyle + "romantic korean pojangmacha street food tent at night with soju and food" },
-                    { time: "22:30", title: "🍧 宵夜：雪冰 (설빙)", desc: "吃完重口味的馬車，回民宿路上吃一碗韓國經典的「黃豆粉麻糬雪冰」，冰涼解膩！", platform: "罪惡宵夜", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "delicious korean bingsu shaved ice with sweet injeolmi powder" }
-                ]
-            },
-            {
-                id: "day3", title: "Day 3", date: "07/10 (五)", highlight: "穿越首爾 👨‍🍳 韓屋外送炸醬麵",
-                events: [
-                    { time: "09:30 - 11:00", title: "🍙 早餐：在地飯捲天國", desc: "找間民宿附近的「飯捲天國 (김밥천국)」，點一份紫菜包飯配泡麵，體驗韓國學生/上班族的經典早午餐。", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "delicious korean gimbap seaweed rice roll slices" },
-                    { time: "11:00", title: "👋 民宿 Check-out", desc: "Bake Stay (大田銀行洞) 退房，前往大田車站。", platform: "Creatrip", color: "bg-gray-100 text-gray-700", prompt: baseStyle + "cute luggage suitcase ready for travel" },
-                    { time: "12:09 - 13:11", title: "🚄 搭乘 KTX 前往首爾", desc: "大田車站 ➡️ 首爾車站。時速超快的 KTX，一個小時就到首爾啦！", platform: "Trip.com", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "modern high speed train ktx running on tracks" },
-                    { time: "13:30 - 14:30", title: "🍔 午餐：首爾站 Shake Shack 漢堡", desc: "抵達首爾站後，直接在站內的 Shake Shack 吃超好吃的起司漢堡跟奶昔，補充能量！", platform: "自由安排", color: "bg-yellow-100 text-yellow-800", prompt: baseStyle + "delicious juicy cheese burger and french fries" },
-                    { time: "15:00", title: "🏠 民宿 Check-in", desc: "Hanok Stay (首爾嘉會洞)。住在傳統韓屋裡，超級特別的體驗！", platform: "Airbnb", color: "bg-amber-100 text-amber-800", prompt: baseStyle + "beautiful traditional korean hanok house building" },
-                    { time: "15:30 - 18:00", title: "🏯 大胖小胖許願：北村韓屋村", desc: "嘉會洞本身就在北村！租一套美美的韓服，在韓屋村的八景穿梭，拍一百張可愛吃貨照！(旁邊的三清洞也很適合散步)", platform: "許願行程", color: "bg-pink-100 text-pink-800", prompt: baseStyle + "cute characters wearing korean hanbok walking in traditional village" },
-                    { time: "19:00 - 21:00", title: "👨‍🍳 大胖小胖許願：黑白大廚朝聖", desc: "【推薦餐廳】Trid (트리드) - 「三星」主廚的法式/現代料理，或是「拿坡里美味黑手黨」的義大利麵。享受極致的味蕾體驗！(務必使用CatchTable提早一個月預約)", platform: "許願行程", color: "bg-zinc-800 text-zinc-100", prompt: baseStyle + "professional chef cooking fancy gourmet food in fine dining restaurant" },
-                    { time: "21:30 - 23:00", title: "🛵 宵夜：傳統韓屋吃外送", desc: "【必體驗】請韓屋主人幫忙叫外送！在古色古香的庭院裡吃「炸醬麵+糖醋肉」或是「橋村炸雞」，絕對是人生一大享受！", platform: "罪惡宵夜", color: "bg-rose-100 text-rose-800", prompt: baseStyle + "delicious black bean noodles jajangmyeon korean delivery food" }
-                ]
-            },
-            {
-                id: "day4", title: "Day 4", date: "07/11 (六)", highlight: "明洞血拼 🚠 浪漫南山夜景",
-                events: [
-                    { time: "08:30 - 10:30", title: "🥯 早餐：倫敦貝果博物館 (安國店)", desc: "【超級網紅店】就在韓屋附近！建議一早就先去抽號碼牌。滿滿排隊人潮，但他們的青蔥乳酪貝果絕對值得！", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "delicious fresh bagel with thick cream cheese spread" },
-                    { time: "11:00", title: "👋 民宿 Check-out", desc: "Hanok Stay (首爾嘉會洞) 退房，搭地鐵或公車前往明洞寄放行李。", platform: "Airbnb", color: "bg-gray-100 text-gray-700", prompt: baseStyle + "cute character carrying shopping bags happily" },
-                    { time: "12:00 - 14:00", title: "🥟 午餐：黃生家刀削麵", desc: "在北村附近吃米其林必比登推薦的刀削麵與大王餃子，吃飽再出發！", platform: "在地推薦", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "bowl of hot korean kalguksu noodle soup and big dumplings" },
-                    { time: "15:00", title: "🏨 飯店 Check-in", desc: "HOTEL BLISS Myeongdong (首爾明洞)。位於精華地段，買完隨時可以拿回房間放！", platform: "Trip.com", color: "bg-teal-100 text-teal-800", prompt: baseStyle + "luxurious modern hotel reception counter" },
-                    { time: "15:30 - 18:30", title: "🛍️ 大胖小胖許願：明洞商圈大爆買", desc: "【攻略推薦】必逛：Olive Young旗艦店(美妝)、Daiso明洞站8層樓(雜貨)、NYUNYU(飾品)。把行李箱塞滿滿！同時在主街路口尋找「龍鬚糖小哥」看表演！", platform: "許願行程", color: "bg-pink-100 text-pink-800", prompt: baseStyle + "busy bright shopping street with stores and cosmetics" },
-                    { time: "18:40 - 20:30", title: "🚠 景點：南山首爾塔 (搭乘纜車)", desc: "【免爬山】從明洞慢慢散步去搭乘南山纜車！不費力就能登上首爾塔俯瞰絕美夕陽與夜景，浪漫指數破表！", platform: "省腳力行程", color: "bg-indigo-100 text-indigo-800", prompt: baseStyle + "beautiful seoul namsan tower glowing at night with cable car" },
-                    { time: "21:00 - 22:30", title: "🍗 宵夜：BHC 炸雞明洞本店", desc: "來韓國怎麼能不吃正宗起司粉炸雞 (Bburinkle) 配啤酒 (Chimaek)！完美結束血拼日。", platform: "罪惡宵夜", color: "bg-red-100 text-red-800", prompt: baseStyle + "crispy korean fried chicken covered in cheese powder" }
-                ]
-            },
-            {
-                id: "day5", title: "Day 5", date: "07/12 (日)", highlight: "滿載而歸 🌿 首爾路7017散步",
-                events: [
-                    { time: "09:00 - 11:00", title: "🍳 早餐+景點：廣藏市場", desc: "搭地鐵到鐘路5街站，走進傳統市場吃頓豐盛早午餐！必點「順熙家綠豆煎餅」跟「麻藥紫菜包飯」，敢吃的話一定要試試生拌牛肉！", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "korean traditional market food stall with pancakes" },
-                    { time: "11:00", title: "👋 飯店 Check-out", desc: "HOTEL BLISS Myeongdong (首爾明洞) 退房。", platform: "Trip.com", color: "bg-gray-100 text-gray-700", prompt: baseStyle + "packed luggage ready for going home" },
-                    { time: "11:30 - 13:00", title: "🍲 首爾最後的美味", desc: "【推薦】明洞必吃「神仙雪濃湯」！濃郁的牛骨湯配上白飯，暖胃又滿足，當作完美的道別午餐。", platform: "自由安排", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "milky white korean seolleongtang ox bone soup in bowl" },
-                    { time: "13:30 - 14:30", title: "🌿 景點：首爾路7017 (Seoullo 7017)", desc: "位於首爾站旁的高架空中花園！平緩好走，綠意盎然，順路散步過去樂天超市，愜意又舒服。", platform: "省腳力行程", color: "bg-emerald-100 text-emerald-800", prompt: baseStyle + "beautiful elevated walking park path full of green plants" },
-                    { time: "14:30 - 16:30", title: "🛒 首爾站樂天超市 (Lotte Mart)", desc: "前往首爾站做最後的零食、海苔、泡麵大補貨！買完可以直接在超市裝箱打包。", platform: "血拼行程", color: "bg-purple-100 text-purple-800", prompt: baseStyle + "shopping cart overflowing with korean snacks and noodles" },
-                    { time: "18:10 - 20:30", title: "🚌 高速巴士前往機場", desc: "首爾高速巴士客運站 ➡️ 清州機場。在車上好好休息，回味這幾天的美食。", platform: "Airbnb", color: "bg-indigo-100 text-indigo-800", prompt: baseStyle + "comfortable express bus driving on highway" },
-                    { time: "23:40 - 01:10", title: "✈️ 帶著滿滿回憶返家", desc: "清州(CJJ) ➡️ 台北(TPE) [抵達已是 7/13 凌晨]。平安到家，準備安排下一次的吃貨之旅！", platform: "Trip.com", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "happy cartoon characters waving goodbye with luggage at airport" }
-                ]
-            }
+            { id: "day1", title: "Day 1", date: "07/08 (三)", highlight: "啟程大田 ⚾ 爆汁烤五花", events: [
+                { time: "02:40 - 06:05", title: "✈️ 飛往韓國囉！", desc: "台北(TPE) ➡️ 清州(CJJ) [桃園機場出發，紅眼班機辛苦啦！]", platform: "Trip.com", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "cute airplane flying in sunny sky" },
+                { time: "06:30 - 08:15", title: "☕ 機場甦醒：輕早餐與整備", desc: "【黃金兩小時】出關後先去機場的 CU 超商買 T-money 卡並儲值。接著在 Paris Baguette 買杯熱拿鐵跟小麵包墊胃，去洗手間盥洗換裝，優雅地迎接旅程！", platform: "行前準備", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "character drinking hot coffee in airport convenience store" },
+                { time: "08:30 - 09:26", title: "🚂 搭乘極窮花號", desc: "清州機場車站 ➡️ 大田車站。欣賞沿途韓國鄉間風景補個眠。", platform: "Trip.com", color: "bg-indigo-100 text-indigo-800", prompt: baseStyle + "korean passenger train traveling through green countryside" },
+                { time: "09:40 - 11:15", title: "🚶‍♂️ 行李寄放 & 中央市場探路", desc: "抵達大田車站後，先在車站內的置物櫃【寄放行李】。接著走到旁邊的大田中央市場逛逛，感受傳統市場的活力，為等下的烤肉大餐開胃！", platform: "自由安排", color: "bg-emerald-100 text-emerald-800", prompt: baseStyle + "bustling traditional korean market with food stalls" },
+                { time: "11:30 - 13:30", title: "🥩 大胖小胖許願：味讚王鹽烤肉", desc: "【推薦店鋪】味讚王鹽烤肉(맛찬들왕소금구이)。3.5公分超厚熟成豬五花！店員會幫忙代烤到金黃酥脆，搭配特製蝦醬超級銷魂～", platform: "吃貨必備", color: "bg-red-100 text-red-800", prompt: baseStyle + "delicious thick korean bbq pork belly sizzling on grill pan" },
+                { time: "15:00", title: "🏠 民宿 Check-in", desc: "Bake Stay (大田銀行洞)。取回行李，到民宿放下行囊，洗個臉休息一下！", platform: "Creatrip", color: "bg-amber-100 text-amber-800", prompt: baseStyle + "cozy and cute modern guesthouse room" },
+                { time: "15:30 - 17:30", title: "☕ 景點：大田蘇堤洞 (소제동) 咖啡街", desc: "離民宿不遠的老屋改建文青聚落！坐下來喝杯拿鐵拍美照，【嚴格控管步數，為晚上保留體力】！", platform: "省腳力行程", color: "bg-emerald-100 text-emerald-800", prompt: baseStyle + "beautiful aesthetic cafe building with latte art coffee on table" },
+                { time: "18:30 - 21:30", title: "⚾ 熱血棒球夜！(附雨備)", desc: "KBO NC恐龍 vs 韓華鷹 (大田韓華生命球場)。記得買球場裡的炸雞配啤酒，跟著韓國球迷一起跳應援舞！", backup: "☔ 【雨備方案】：若賽事因雨取消，改往民宿下方的「中央路地下街」大血拼，不怕淋雨還能順便吃室內小吃；或是找間「汗蒸幕」搓澡、喝甜米釀，讓疲勞徹底釋放！", platform: "代購/雨備", color: "bg-green-100 text-green-800", prompt: baseStyle + "cute baseball player hitting ball in crowded stadium" },
+                { time: "22:00 - 23:00", title: "🍢 宵夜：銀杏洞 Skyroad 糖葫蘆", desc: "看完球賽搭公車回銀杏洞，在熱鬧的商圈買串現做「糖葫蘆」或是路邊攤辣炒年糕，帶回民宿當宵夜！", platform: "罪惡宵夜", color: "bg-purple-100 text-purple-800", prompt: baseStyle + "delicious shiny candied fruit tanghulu stick korean street food" }
+            ]},
+            { id: "day2", title: "Day 2", date: "07/09 (四)", highlight: "大田漫遊 ♨️ 汗蒸幕與馬車", events: [
+                { time: "09:30 - 10:30", title: "🥪 早餐：Isaac Toast", desc: "韓國國民早餐！鐵板奶油現烤吐司夾著特製醬料與煎蛋，快速解決又美味。", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "tasty korean toast sandwich with melted cheese and egg" },
+                { time: "10:30 - 12:00", title: "🥐 聖心堂朝聖", desc: "【大田名產】就在銀杏洞！絕對不能錯過韓國最知名麵包店「聖心堂」買炸韭菜麵包、明太子法國麵包！", platform: "在地推薦", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "cute bakery display full of delicious fresh bread and croissants" },
+                { time: "12:30 - 14:00", title: "🛍️ 景點：大田新世界百貨", desc: "吃完早餐先去超美的「大田新世界百貨」逛街喝咖啡吹冷氣，順便消化一下！", platform: "自由安排", color: "bg-purple-100 text-purple-800", prompt: baseStyle + "modern beautiful department store shopping mall architecture" },
+                { time: "14:30 - 18:00", title: "♨️ 下午茶與放鬆：東方朔汗蒸幕", desc: "【鐵腿救星】大田最有名的汗蒸幕！換上專屬服裝、折個羊角頭，買杯冰涼的「甜米釀(식혜)」和烤雞蛋。在溫暖的地熱墊上睡個午覺，把旅行的疲勞全部排光光！", platform: "許願行程", color: "bg-cyan-100 text-cyan-800", prompt: baseStyle + "cute couple wearing sheep head towel in korean jjimjilbang sauna eating eggs" },
+                { time: "19:30 - 22:00", title: "🎪 大胖小胖許願：木尺橋布帳馬車", desc: "【推薦地點】木尺橋布帳馬車街(목척교)。離民宿不遠的川邊，體驗韓劇主角的浪漫！必點辣炒豬肉、雞蛋捲配燒酒，感受在地微醺夜。", platform: "許願行程", color: "bg-rose-100 text-rose-800", prompt: baseStyle + "romantic korean pojangmacha street food tent at night with soju and food" },
+                { time: "22:30", title: "🍧 宵夜：雪冰 (설빙)", desc: "吃完重口味的馬車，回民宿路上吃一碗韓國經典的「黃豆粉麻糬雪冰」，冰涼解膩！", platform: "罪惡宵夜", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "delicious korean bingsu shaved ice with sweet injeolmi powder" }
+            ]},
+            { id: "day3", title: "Day 3", date: "07/10 (五)", highlight: "穿越首爾 👨‍🍳 韓屋外送炸醬麵", events: [
+                { time: "09:30 - 11:00", title: "🍙 早餐：在地飯捲天國", desc: "找間民宿附近的「飯捲天國 (김밥천국)」，點一份紫菜包飯配泡麵，體驗韓國學生/上班族的經典早午餐。", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "delicious korean gimbap seaweed rice roll slices" },
+                { time: "11:00", title: "👋 民宿 Check-out", desc: "Bake Stay (大田銀行洞) 退房，前往大田車站。", platform: "Creatrip", color: "bg-gray-100 text-gray-700", prompt: baseStyle + "cute luggage suitcase ready for travel" },
+                { time: "12:09 - 13:11", title: "🚄 搭乘 KTX 前往首爾", desc: "大田車站 ➡️ 首爾車站。時速超快的 KTX，一個小時就到首爾啦！", platform: "Trip.com", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "modern high speed train ktx running on tracks" },
+                { time: "13:30 - 14:30", title: "🍔 午餐：首爾站 Shake Shack 漢堡", desc: "抵達首爾站後，直接在站內的 Shake Shack 吃超好吃的起司漢堡跟奶昔，補充能量！", platform: "自由安排", color: "bg-yellow-100 text-yellow-800", prompt: baseStyle + "delicious juicy cheese burger and french fries" },
+                { time: "15:00", title: "🏠 民宿 Check-in", desc: "Hanok Stay (首爾嘉會洞)。住在傳統韓屋裡，超級特別的體驗！", platform: "Airbnb", color: "bg-amber-100 text-amber-800", prompt: baseStyle + "beautiful traditional korean hanok house building" },
+                { time: "15:30 - 18:00", title: "🏯 大胖小胖許願：北村韓屋村", desc: "嘉會洞本身就在北村！租一套美美的韓服，在韓屋村的八景穿梭，拍一百張可愛吃貨照！(旁邊的三清洞也很適合散步)", platform: "許願行程", color: "bg-pink-100 text-pink-800", prompt: baseStyle + "cute characters wearing korean hanbok walking in traditional village" },
+                { time: "19:00 - 21:00", title: "👨‍🍳 大胖小胖許願：黑白大廚朝聖", desc: "【推薦餐廳】Trid (트리드) - 「三星」主廚的法式/現代料理，或是「拿坡里美味黑手黨」的義大利麵。享受極致的味蕾體驗！(務必使用CatchTable提早一個月預約)", platform: "許願行程", color: "bg-zinc-800 text-zinc-100", prompt: baseStyle + "professional chef cooking fancy gourmet food in fine dining restaurant" },
+                { time: "21:30 - 23:00", title: "🛵 宵夜：傳統韓屋吃外送", desc: "【必體驗】請韓屋主人幫忙叫外送！在古色古香的庭院裡吃「炸醬麵+糖醋肉」或是「橋村炸雞」，絕對是人生一大享受！", platform: "罪惡宵夜", color: "bg-rose-100 text-rose-800", prompt: baseStyle + "delicious black bean noodles jajangmyeon korean delivery food" }
+            ]},
+            { id: "day4", title: "Day 4", date: "07/11 (六)", highlight: "明洞血拼 🚠 浪漫南山夜景", events: [
+                { time: "08:30 - 10:30", title: "🥯 早餐：倫敦貝果博物館 (安國店)", desc: "【超級網紅店】就在韓屋附近！建議一早就先去抽號碼牌。滿滿排隊人潮，但他們的青蔥乳酪貝果絕對值得！", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "delicious fresh bagel with thick cream cheese spread" },
+                { time: "11:00", title: "👋 民宿 Check-out", desc: "Hanok Stay (首爾嘉會洞) 退房，搭地鐵或公車前往明洞寄放行李。", platform: "Airbnb", color: "bg-gray-100 text-gray-700", prompt: baseStyle + "cute character carrying shopping bags happily" },
+                { time: "12:00 - 14:00", title: "🥟 午餐：黃生家刀削麵", desc: "在北村附近吃米其林必比登推薦的刀削麵與大王餃子，吃飽再出發！", platform: "在地推薦", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "bowl of hot korean kalguksu noodle soup and big dumplings" },
+                { time: "15:00", title: "🏨 飯店 Check-in", desc: "HOTEL BLISS Myeongdong (首爾明洞)。位於精華地段，買完隨時可以拿回房間放！", platform: "Trip.com", color: "bg-teal-100 text-teal-800", prompt: baseStyle + "luxurious modern hotel reception counter" },
+                { time: "15:30 - 18:30", title: "🛍️ 大胖小胖許願：明洞商圈大爆買", desc: "【攻略推薦】必逛：Olive Young旗艦店(美妝)、Daiso明洞站8層樓(雜貨)、NYUNYU(飾品)。把行李箱塞滿滿！同時在主街路口尋找「龍鬚糖小哥」看表演！", platform: "許願行程", color: "bg-pink-100 text-pink-800", prompt: baseStyle + "busy bright shopping street with stores and cosmetics" },
+                { time: "18:40 - 20:30", title: "🚠 景點：南山首爾塔 (搭乘纜車)", desc: "【免爬山】從明洞慢慢散步去搭乘南山纜車！不費力就能登上首爾塔俯瞰絕美夕陽與夜景，浪漫指數破表！", platform: "省腳力行程", color: "bg-indigo-100 text-indigo-800", prompt: baseStyle + "beautiful seoul namsan tower glowing at night with cable car" },
+                { time: "21:00 - 22:30", title: "🍗 宵夜：BHC 炸雞明洞本店", desc: "來韓國怎麼能不吃正宗起司粉炸雞 (Bburinkle) 配啤酒 (Chimaek)！完美結束血拼日。", platform: "罪惡宵夜", color: "bg-red-100 text-red-800", prompt: baseStyle + "crispy korean fried chicken covered in cheese powder" }
+            ]},
+            { id: "day5", title: "Day 5", date: "07/12 (日)", highlight: "滿載而歸 🌿 首爾路7017散步", events: [
+                { time: "09:00 - 11:00", title: "🍳 早餐+景點：廣藏市場", desc: "搭地鐵到鐘路5街站，走進傳統市場吃頓豐盛早午餐！必點「順熙家綠豆煎餅」跟「麻藥紫菜包飯」，敢吃的話一定要試試生拌牛肉！", platform: "活力早餐", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "korean traditional market food stall with pancakes" },
+                { time: "11:00", title: "👋 飯店 Check-out", desc: "HOTEL BLISS Myeongdong (首爾明洞) 退房。", platform: "Trip.com", color: "bg-gray-100 text-gray-700", prompt: baseStyle + "packed luggage ready for going home" },
+                { time: "11:30 - 13:00", title: "🍲 首爾最後的美味", desc: "【推薦】明洞必吃「神仙雪濃湯」！濃郁的牛骨湯配上白飯，暖胃又滿足，當作完美的道別午餐。", platform: "自由安排", color: "bg-orange-100 text-orange-800", prompt: baseStyle + "milky white korean seolleongtang ox bone soup in bowl" },
+                { time: "13:30 - 14:30", title: "🌿 景點：首爾路7017 (Seoullo 7017)", desc: "位於首爾站旁的高架空中花園！平緩好走，綠意盎然，順路散步過去樂天超市，愜意又舒服。", platform: "省腳力行程", color: "bg-emerald-100 text-emerald-800", prompt: baseStyle + "beautiful elevated walking park path full of green plants" },
+                { time: "14:30 - 16:30", title: "🛒 首爾站樂天超市 (Lotte Mart)", desc: "前往首爾站做最後的零食、海苔、泡麵大補貨！買完可以直接在超市裝箱打包。", platform: "血拼行程", color: "bg-purple-100 text-purple-800", prompt: baseStyle + "shopping cart overflowing with korean snacks and noodles" },
+                { time: "18:10 - 20:30", title: "🚌 高速巴士前往機場", desc: "首爾高速巴士客運站 ➡️ 清州機場。在車上好好休息，回味這幾天的美食。", platform: "Airbnb", color: "bg-indigo-100 text-indigo-800", prompt: baseStyle + "comfortable express bus driving on highway" },
+                { time: "23:40 - 01:10", title: "✈️ 帶著滿滿回憶返家", desc: "清州(CJJ) ➡️ 台北(TPE) [抵達已是 7/13 凌晨]。平安到家，準備安排下一次的吃貨之旅！", platform: "Trip.com", color: "bg-blue-100 text-blue-800", prompt: baseStyle + "happy cartoon characters waving goodbye with luggage at airport" }
+            ]}
         ];
 
-        // 渲染 Tabs 切換按鈕
         function renderTabs() {
             const container = document.getElementById('tabs-container');
             container.innerHTML = '';
-            
             days.forEach((day, index) => {
                 const isActive = activeDay === index;
-                const baseClasses = "snap-center flex-shrink-0 w-[100px] sm:w-[120px] py-2 sm:py-3 rounded-2xl font-bold transition-all duration-300 shadow-sm border-2 flex flex-col items-center justify-center cursor-pointer";
-                const activeClasses = "bg-gradient-to-br from-rose-400 to-pink-500 text-white border-transparent scale-105 shadow-pink-300 shadow-lg";
-                const inactiveClasses = "bg-white text-slate-500 border-rose-100 hover:bg-rose-50 hover:scale-105";
-                
                 const btn = document.createElement('button');
-                btn.className = `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
-                btn.onclick = () => {
-                    activeDay = index;
-                    renderTabs();
-                    renderEvents();
-                };
-                
-                btn.innerHTML = `
-                    <span class="text-[10px] sm:text-xs opacity-90 mb-1">${day.date}</span>
-                    <span class="text-base sm:text-lg tracking-wide">${day.title}</span>
-                `;
+                btn.className = `snap-center flex-shrink-0 w-[100px] sm:w-[120px] py-2 sm:py-3 rounded-2xl font-bold transition-all duration-300 shadow-sm border-2 flex flex-col items-center justify-center cursor-pointer ${isActive ? 'bg-gradient-to-br from-rose-400 to-pink-500 text-white border-transparent scale-105 shadow-pink-300' : 'bg-white text-slate-500 border-rose-100 hover:bg-rose-50'}`;
+                btn.onclick = () => { activeDay = index; renderTabs(); renderEvents(); };
+                btn.innerHTML = `<span class="text-[10px] sm:text-xs opacity-90 mb-1">${day.date}</span><span class="text-base sm:text-lg tracking-wide">${day.title}</span>`;
                 container.appendChild(btn);
             });
         }
 
-        // 渲染行程卡片內容
         function renderEvents() {
             const dayData = days[activeDay];
-            
-            // 更新亮點文字
             document.getElementById('highlight-text').innerText = `🌟 本日亮點：${dayData.highlight}`;
             
-            // 更新卡片內容
             const container = document.getElementById('events-container');
-            let htmlContent = '';
-
-            dayData.events.forEach((event, idx) => {
-                // 處理標籤
-                let platformTag = '';
-                if (event.platform) {
-                    const isWish = event.platform.includes('許願');
-                    const isRec = event.platform.includes('推薦');
-                    let badgeClass = 'bg-slate-100 text-slate-600 border border-slate-200';
-                    let icon = '📌 ';
-                    
-                    if (isWish) {
-                        badgeClass = 'bg-gradient-to-r from-pink-500 to-rose-400 text-white';
-                        icon = '❤️ ';
-                    } else if (isRec) {
-                        badgeClass = 'bg-orange-400 text-white border-none shadow-sm';
-                    }
-                    
-                    platformTag = `
-                        <span class="text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-lg font-bold shadow-sm whitespace-nowrap ${badgeClass}">
-                            ${icon}${event.platform}
-                        </span>`;
-                }
-
-                // 處理【高亮文字】
-                const formattedDesc = event.desc.replace(/【(.*?)】/g, '<span class="font-black text-rose-600">【$1】</span>');
-
-                // 處理雨備方案
-                let backupBlock = '';
-                if (event.backup) {
-                    backupBlock = `
-                        <div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-slate-50 border-l-4 border-blue-400 rounded-r-xl shadow-inner">
-                            <p class="text-blue-700 font-bold text-[12px] sm:text-[14px] leading-relaxed">
-                                ${event.backup}
-                            </p>
-                        </div>`;
-                }
-
-                // 處理圖片 (導入智能雙層離線載入機制)
-                let imgBlock = '';
-                if (event.prompt) {
-                    // 1. 本地路徑：尋找同目錄下 images 資料夾裡的圖片 (給 GitHub Pages 部署使用)
-                    const localImgUrl = `./images/day${activeDay + 1}_${idx + 1}.jpg`;
-                    // 2. 線上生成路徑：如果本地找不到 ( onerror )，則呼叫 AI 產生
-                    const onlineImgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(event.prompt)}?seed=2026${activeDay}${idx}`;
-                    
-                    imgBlock = `
-                        <div class="mt-3 sm:mt-4 rounded-xl overflow-hidden shadow-inner border border-slate-100 aspect-video relative group/img bg-rose-50 flex flex-col items-center justify-center">
-                            <!-- 載入中/失敗的背景底圖 -->
-                            <svg class="w-8 h-8 text-rose-200 mb-2 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <span class="absolute text-rose-400 font-bold text-[10px] sm:text-xs z-0 mt-12 tracking-wider">🌸 尋找/生成高畫質 Q版圖片中...</span>
-                            
-                            <!-- 雙層載入機制：優先嘗試載入 localImgUrl，若失敗 (onerror) 則載入 onlineImgUrl -->
-                            <img 
-                                src="${localImgUrl}" 
-                                alt="${event.title}" 
-                                class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover/img:scale-110 z-10" 
-                                loading="lazy" 
-                                onerror="if(!this.dataset.fallback){ this.dataset.fallback='true'; this.src='${onlineImgUrl}'; } else { this.style.display='none'; }"
-                            />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 z-20 pointer-events-none"></div>
-                        </div>`;
-                }
-
-                htmlContent += `
-                    <div class="relative pl-5 sm:pl-10 group w-full">
-                        <div class="absolute -left-[11px] sm:-left-[14px] top-1.5 sm:top-1 w-5 h-5 sm:w-6 sm:h-6 bg-rose-400 rounded-full border-[3px] sm:border-4 border-white shadow-md group-hover:scale-125 group-hover:bg-pink-500 transition-all duration-300 z-10"></div>
-                        
-                        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden relative w-full break-words">
-                            
-                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                                <span class="text-rose-600 font-black text-xs sm:text-sm bg-rose-50 px-2 sm:px-3 py-1 rounded-lg border border-rose-100 whitespace-nowrap">
-                                    ⏰ ${event.time}
-                                </span>
-                                ${platformTag}
-                            </div>
-
-                            <h3 class="text-base sm:text-xl font-bold mb-2 sm:mb-3 p-2 rounded-xl inline-block max-w-full break-words ${event.color || 'bg-slate-100'}">
-                                ${event.title}
-                            </h3>
-                            
-                            <p class="text-slate-600 leading-relaxed font-medium text-[13px] sm:text-[15px] break-words">
-                                ${formattedDesc}
-                            </p>
-
-                            ${backupBlock}
-                            ${imgBlock}
+            container.innerHTML = dayData.events.map((event, idx) => `
+                <div class="relative pl-5 sm:pl-10 group w-full">
+                    <div class="absolute -left-[11px] sm:-left-[14px] top-1.5 sm:top-1 w-5 h-5 sm:w-6 sm:h-6 bg-rose-400 rounded-full border-[3px] sm:border-4 border-white shadow-md z-10"></div>
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 w-full">
+                        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+                            <span class="text-rose-600 font-black text-xs sm:text-sm bg-rose-50 px-2 sm:px-3 py-1 rounded-lg border border-rose-100">⏰ ${event.time}</span>
+                            ${event.platform ? `<span class="text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-lg font-bold shadow-sm ${event.platform.includes('許願') ? 'bg-pink-500 text-white' : 'bg-slate-100 text-slate-600'}">${event.platform}</span>` : ''}
                         </div>
-                    </div>`;
-            });
+                        <h3 class="text-base sm:text-xl font-bold mb-2 p-2 rounded-xl inline-block ${event.color || 'bg-slate-100'}">${event.title}</h3>
+                        <p class="text-slate-600 leading-relaxed font-medium text-[13px] sm:text-[15px]">${event.desc.replace(/【(.*?)】/g, '<span class="font-black text-rose-600">【$1】</span>')}</p>
+                        ${event.backup ? `<div class="mt-3 p-3 bg-slate-50 border-l-4 border-blue-400 rounded-r-xl"><p class="text-blue-700 font-bold text-[12px] sm:text-[14px]">${event.backup}</p></div>` : ''}
+                        <img src="./images/day${activeDay + 1}_${idx + 1}.jpg" onerror="this.src='https://image.pollinations.ai/prompt/${encodeURIComponent(event.prompt)}?seed=2026${activeDay}${idx}'" class="mt-4 rounded-xl w-full aspect-video object-cover" />
+                    </div>
+                </div>
+            `).join('');
 
-            container.innerHTML = htmlContent;
+            // 渲染底部導航
+            const nav = document.getElementById('nav-container');
+            nav.innerHTML = `
+                ${activeDay > 0 ? `<button onclick="changeDay(-1)" class="flex-1 py-3 bg-white rounded-xl shadow border border-rose-200 text-rose-600 font-bold hover:bg-rose-50">⬅️ 前一日</button>` : '<div class="flex-1"></div>'}
+                ${activeDay < days.length - 1 ? `<button onclick="changeDay(1)" class="flex-1 py-3 bg-white rounded-xl shadow border border-rose-200 text-rose-600 font-bold hover:bg-rose-50">次一日 ➡️</button>` : '<div class="flex-1"></div>'}
+            `;
         }
 
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
+        function changeDay(delta) {
+            activeDay += delta;
             renderTabs();
             renderEvents();
-        });
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { renderTabs(); renderEvents(); });
     </script>
 </body>
 </html>
